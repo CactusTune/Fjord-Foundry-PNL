@@ -46,7 +46,6 @@ async function main() {
       ethers.formatUnits(event.args?.[2]!, 18)
     );
 
-    console.log(gemaiAmount);
     const amount_bought: number = parseFloat(
       ethers.formatUnits(event.args?.[3]!, 6)
     );
