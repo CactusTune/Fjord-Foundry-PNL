@@ -9,6 +9,7 @@ interface UserBalances {
   sellVolume: number;
   totalTrades: number;
   usdtBalance: number;
+  gemaiBalance: number;
   PNL?: number;
 }
 
@@ -41,6 +42,11 @@ async function main() {
 
   buy_events.forEach((event: any) => {
     const buyer: string = event.args?.[2]!;
+    const gemaiAmount: number = parseFloat(
+      ethers.formatUnits(event.args?.[2]!, 18)
+    );
+
+    console.log(gemaiAmount);
     const amount_bought: number = parseFloat(
       ethers.formatUnits(event.args?.[3]!, 6)
     );
@@ -50,13 +56,18 @@ async function main() {
       sellVolume: 0,
       totalTrades: 0,
       usdtBalance: 0,
+      gemaiBalance: 0,
     };
     users[buyer].buyVolume += amount_bought;
     users[buyer].totalTrades++;
+    users[buyer].gemaiBalance += gemaiAmount;
   });
 
   sell_events.forEach((event: any) => {
     const seller: string = event.args?.[0]!;
+    const gemaiAmount: number = parseFloat(
+      ethers.formatUnits(event.args?.[2]!, 18)
+    );
     const amount_received: number = parseFloat(
       ethers.formatUnits(event.args?.[1]!, 18)
     );
@@ -66,10 +77,12 @@ async function main() {
       sellVolume: 0,
       totalTrades: 0,
       usdtBalance: 0,
+      gemaiBalance: 0,
     };
     users[seller].sellVolume += amount_received;
     users[seller].totalTrades++;
     users[seller].usdtBalance += amount_received;
+    users[seller].gemaiBalance += gemaiAmount;
   });
 
   for (const user in users) {
@@ -80,6 +93,7 @@ async function main() {
     Object.entries(users).map(([user, data]) => ({
       User: user,
       USDT: data.usdtBalance.toFixed(2),
+      GEMAI: data.gemaiBalance.toFixed(2),
       BuyVolume: data.buyVolume.toFixed(2),
       SellVolume: data.sellVolume.toFixed(2),
       TotalTrades: data.totalTrades,
